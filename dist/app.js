@@ -29,3 +29,48 @@ photos.forEach((p,i)=>{const button=document.createElement('button');button.setA
 function showPhoto(index){photo=(index+photos.length)%photos.length;const item=photos[photo];const id=++loadId;const preload=new Image();preload.onload=()=>{if(id!==loadId)return;image.src=preload.src;image.alt=item[3];document.querySelector('#gallery-title').textContent=item[1];document.querySelector('#gallery-description').textContent=item[2];document.querySelector('#gallery-count').textContent=`${String(photo+1).padStart(2,'0')} / ${String(photos.length).padStart(2,'0')}`;dots.querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===photo)));};preload.src=`assets/asset-${item[0]}.webp`;}
 document.querySelector('#gallery-prev').addEventListener('click',()=>showPhoto(photo-1));document.querySelector('#gallery-next').addEventListener('click',()=>showPhoto(photo+1));document.querySelector('.gallery').addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();showPhoto(photo+(e.key==='ArrowRight'?1:-1));}});
 let touchX=null;image.addEventListener('touchstart',e=>{touchX=e.changedTouches[0].clientX;},{passive:true});image.addEventListener('touchend',e=>{if(touchX!==null){const dx=e.changedTouches[0].clientX-touchX;if(Math.abs(dx)>45)showPhoto(photo+(dx<0?1:-1));}touchX=null;},{passive:true});
+
+// An intentional first step: choose a society before entering the proposal.
+const societyMessages = {
+ ISC: ['Why not 2?', 'There are enough Mauja-type events, this would be refreshing'],
+ SLA: ['What could be better than Suits n Sarees?', 'This.'],
+ PA: ["I'm the treasurer and I approve of this proposal.", "It's a good idea trust me"],
+ NC: ['The Nepalese Club deserves a ball too.', 'I have big ambitions for NC'],
+ GS: ['Probably the biggest event GS would put on.', 'And I know you guys can do it'],
+ TELS: ['Much bigger than Mehendi and Mocktails.', 'An experience to remember']
+};
+const gate = document.querySelector('#society-gate');
+const pageContent = document.querySelector('#page-content');
+const intro = document.querySelector('#society-intro');
+const siteHeader = document.querySelector('header');
+function openSocieties(){
+ closeMenu();
+ pageContent.inert = true;
+ document.body.classList.add('choosing-society');
+ if(gate.open) gate.close();
+ gate.showModal();
+}
+gate.addEventListener('cancel',event=>event.preventDefault());
+// Keep the entry screen available if a browser dismisses the dialog itself.
+gate.addEventListener('close',()=>{if(pageContent.inert&&!gate.open)gate.showModal();});
+gate.querySelectorAll('[data-society]').forEach(button=>button.addEventListener('click',()=>{
+ const society=button.dataset.society;
+ document.querySelector('#intro-society').textContent=`A NOTE FOR ${society}`;
+ document.querySelector('#intro-title').textContent=societyMessages[society][0];
+ document.querySelector('#intro-subtitle').textContent=societyMessages[society][1];
+ gate.close();
+ pageContent.inert=false;
+ document.body.classList.remove('choosing-society');
+ document.body.classList.add('intro-active');
+ siteHeader.inert=true;
+ intro.scrollIntoView({behavior:'instant',block:'start'});
+ document.querySelector('#intro-title').focus({preventScroll:true});
+}));
+document.querySelector('#change-society').addEventListener('click',openSocieties);
+const introObserver=new IntersectionObserver(entries=>{
+ const active=entries[0].isIntersecting;
+ document.body.classList.toggle('intro-active',active);
+ siteHeader.inert=active;
+},{threshold:0,rootMargin:'-110px 0px 0px 0px'});
+introObserver.observe(intro);
+openSocieties();

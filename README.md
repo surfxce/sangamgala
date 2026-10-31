@@ -10,6 +10,9 @@ Open http://localhost:4173. No dependencies or build step. Deploy the `dist/` di
 
 ## Features
 
+- Fullscreen black society chooser, followed by six personalised introductions and a scroll prompt.
+- Slide-inspired executive profile with an arch, botanical background, dark gradient and structured details.
+
 - Supplied Sangam logo in the header, hero and footer.
 - Responsive story, cause shortlist, evening timeline, auction and collaboration sections.
 - Nine original inspiration photos with previous/next controls, direct selection, arrow keys and touch swipes.
