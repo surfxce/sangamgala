@@ -1,17 +1,24 @@
 # Sangam Gala
 
-A lightweight, animated presentation website based on the supplied 12-page Sangam Gala proposal. The PDF artwork is preserved as optimised images, keeping its exact typography, botanical illustrations, colours and layout. Segmented entrances add motion without changing the original design.
+A responsive, web-native event proposal inspired by the original Sangam Gala pitch: gold typography, botanical artwork, an atmospheric hero, and accessible HTML content.
 
-## Preview
+## Run locally
 
-Run `python3 -m http.server 4173 --directory dist` and open http://localhost:4173.
+`python3 -m http.server 4173 --directory dist`
 
-No dependencies or build step. Deploy `dist/` to any static web host.
+Open http://localhost:4173. No dependencies or build step. Deploy the `dist/` directory to any static host.
 
-## Controls
+## Features
 
-Scroll, use the arrow buttons, or use arrow keys / Page Up / Page Down. Home and End jump to the first and last slides. Chapters opens direct navigation. Read slide provides selectable, accessible text, particularly useful on phones. Motion can be disabled, and the site respects reduced-motion system settings.
+- Supplied Sangam logo in the header, hero and footer.
+- Responsive story, cause shortlist, evening timeline, auction and collaboration sections.
+- Nine original inspiration photos with previous/next controls, direct selection, arrow keys and touch swipes.
+- Subtle canvas glitter and scroll reveals; motion toggle and system reduced-motion support.
+- Executive Experience Auction wording, illustrative service perk and proposed participation safeguards. No claim of university approval.
+- Footer link to the unchanged original 12-page pitch PDF (approximately 41 MB).
 
-## Editing
+## Edit
 
-Slide artwork lives in `dist/assets/`; headings and accessible transcripts are in `dist/slides.js`. Styling is in `dist/style.css`, behaviour in `dist/app.js`. This is an event proposal, so no ticket checkout or unconfirmed date/venue is invented.
+Content: `dist/index.html`. Design: `dist/style.css`. Gallery and interactions: `dist/app.js`. Artwork and original pitch: `dist/assets/`.
+
+The site is a proposal. Venue, date, beneficiary, final auction lots and university review remain to be confirmed. There is no ticket checkout or live bidding.
