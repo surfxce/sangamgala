@@ -74,3 +74,77 @@ const introObserver=new IntersectionObserver(entries=>{
 },{threshold:0,rootMargin:'-110px 0px 0px 0px'});
 introObserver.observe(intro);
 openSocieties();
+
+// Measure every possible caption at the current width, rather than allowing
+// different line counts to push the gallery controls up and down.
+function reserveGalleryCopy(){
+ for(const [selector,column] of [['#gallery-title',1],['#gallery-description',2]]){
+  const target=document.querySelector(selector);
+  const width=target.getBoundingClientRect().width;
+  if(!width)continue;
+  const sample=target.cloneNode(false);
+  sample.removeAttribute('id');sample.setAttribute('aria-hidden','true');
+  Object.assign(sample.style,{position:'absolute',visibility:'hidden',pointerEvents:'none',width:`${width}px`,minHeight:'0',height:'auto',margin:'0'});
+  target.after(sample);
+  let max=0;
+  for(const item of photos){sample.textContent=item[column];max=Math.max(max,sample.getBoundingClientRect().height);}
+  sample.remove();target.style.minHeight=`${Math.ceil(max)}px`;
+ }
+}
+reserveGalleryCopy();document.fonts.ready.then(reserveGalleryCopy);
+let galleryWidth=0;
+new ResizeObserver(entries=>{const width=entries[0].contentRect.width;if(Math.abs(width-galleryWidth)>1){galleryWidth=width;reserveGalleryCopy();}}).observe(document.querySelector('.gallery-side'));
+
+const scriptWord=document.querySelector('#sangam-script');
+const scripts=[['සංගමය','si'],['ਸੰਗਮ','pa'],['संगम','hi'],['சங்கம்','ta'],['સંગમ','gu'],['సంఘం','te']];
+let scriptTimer=null;
+const ensemble=document.querySelector('#society-ensemble');
+let ensembleAnimations=[];
+function finishSequences(){
+ clearTimeout(scriptTimer);scriptTimer=null;
+ scriptWord.textContent='Sangam';scriptWord.removeAttribute('lang');
+ ensembleAnimations.forEach(animation=>animation.cancel());ensembleAnimations=[];
+ ensemble.dataset.phase='settled';
+}
+function playScripts(index=0){
+ if(motionOff||index>=scripts.length){scriptWord.textContent='Sangam';scriptWord.removeAttribute('lang');return;}
+ scriptWord.textContent=scripts[index][0];scriptWord.lang=scripts[index][1];
+ scriptTimer=setTimeout(()=>playScripts(index+1),450);
+}
+function playEnsemble(){
+ if(motionOff)return;
+ const bounds=ensemble.getBoundingClientRect();
+ const figures=[...ensemble.querySelectorAll('figure')];
+ const radius=Math.min(bounds.width*.32,150);
+ ensemble.dataset.phase='playing';
+ ensembleAnimations=figures.map((figure,i)=>{
+  const box=figure.getBoundingClientRect();
+  const cx=bounds.left+bounds.width/2-(box.left+box.width/2);
+  const cy=bounds.top+bounds.height/2-(box.top+box.height/2);
+  const transform=(x,y,scale=1)=>`translate(${x}px,${y}px) scale(${scale})`;
+  const centre=transform(cx,cy,1.65);
+  const start=i*500/5600,end=(i+1)*500/5600;
+  const keys=[{offset:0,opacity:0,transform:centre}];
+  if(start>0)keys.push({offset:start,opacity:0,transform:centre});
+  keys.push({offset:start+.015,opacity:1,transform:centre},{offset:end-.015,opacity:1,transform:centre},{offset:end,opacity:0,transform:centre});
+  // Emerge into a ring, revolve together, then find their final grid positions.
+  for(let step=0;step<=4;step++){
+   const angle=i*Math.PI/3-Math.PI/2+step*Math.PI/6;
+   keys.push({offset:(3100+step*350)/5600,opacity:1,transform:transform(cx+Math.cos(angle)*radius,cy+Math.sin(angle)*radius,.72),easing:'ease-in-out'});
+  }
+  keys.push({offset:1,opacity:1,transform:'translate(0px,0px) scale(1)'});
+  return figure.animate(keys,{duration:5600,easing:'linear',fill:'none'});
+ });
+ Promise.all(ensembleAnimations.map(a=>a.finished.catch(()=>{}))).then(()=>{ensemble.dataset.phase='settled';});
+}
+const sequenceObserver=new IntersectionObserver(entries=>{
+ for(const entry of entries){if(!entry.isIntersecting||pageContent.inert)continue;
+  sequenceObserver.unobserve(entry.target);
+  if(entry.target===scriptWord)playScripts();else playEnsemble();
+ }
+},{threshold:.6});
+sequenceObserver.observe(scriptWord);sequenceObserver.observe(ensemble);
+motionButton.addEventListener('click',()=>{if(motionOff)finishSequences();});
+reduced.addEventListener('change',()=>{if(motionOff)finishSequences();});
+let sequenceWidth=innerWidth;
+addEventListener('resize',()=>{if(innerWidth!==sequenceWidth){sequenceWidth=innerWidth;if(ensembleAnimations.some(a=>a.playState==='running'))finishSequences();}});
