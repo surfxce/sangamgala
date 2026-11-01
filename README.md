@@ -4,9 +4,9 @@ A responsive, web-native event proposal inspired by the original Sangam Gala pit
 
 ## Run locally
 
-`python3 -m http.server 4173 --directory dist`
+`python3 -m http.server 4173`
 
-Open http://localhost:4173. No dependencies or build step. Deploy the `dist/` directory to any static host.
+Open http://localhost:4173. No dependencies or build step. GitHub Pages serves the website directly from `main` → `/ (root)`. The root `index.html` is the entry point; `CNAME` retains the custom domain.
 
 ## Features
 
@@ -22,6 +22,6 @@ Open http://localhost:4173. No dependencies or build step. Deploy the `dist/` di
 
 ## Edit
 
-Content: `dist/index.html`. Design: `dist/style.css`. Gallery and interactions: `dist/app.js`. Artwork and original pitch: `dist/assets/`.
+Content: `index.html`. Design: `style.css`. Gallery and interactions: `app.js`. Artwork and original pitch: `assets/`.
 
 The site is a proposal. Venue, date, beneficiary, final auction lots and university review remain to be confirmed. There is no ticket checkout or live bidding.
