@@ -10,6 +10,11 @@ Open http://localhost:4173. No dependencies or build step. GitHub Pages serves t
 
 ## Features
 
+- Vision / execution navigation with a floating execution section menu.
+- Fonts, colours and details design-system tabs with annotated wordmark and supplied references.
+- Static planning list; venue outreach marked in progress. Status updates are maintained in the source.
+- Multilingual Sangam lettering sweeps in from the left and resolves to the wordmark.
+
 - Fullscreen black society chooser, followed by six personalised introductions and a scroll prompt.
 - Slide-inspired executive profile with an arch, botanical background, dark gradient and structured details.
 

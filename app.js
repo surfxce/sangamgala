@@ -49,10 +49,11 @@ function openSocieties(){
  document.body.classList.add('choosing-society');
  if(gate.open) gate.close();
  gate.showModal();
+ document.querySelector('#gate-title').focus({preventScroll:true});
 }
 gate.addEventListener('cancel',event=>event.preventDefault());
 // Keep the entry screen available if a browser dismisses the dialog itself.
-gate.addEventListener('close',()=>{if(pageContent.inert&&!gate.open)gate.showModal();});
+gate.addEventListener('close',()=>{if(pageContent.inert&&!gate.open){gate.showModal();document.querySelector('#gate-title').focus({preventScroll:true});}});
 gate.querySelectorAll('[data-society]').forEach(button=>button.addEventListener('click',()=>{
  const society=button.dataset.society;
  document.querySelector('#intro-society').textContent=`A NOTE FOR ${society}`;
@@ -98,18 +99,30 @@ new ResizeObserver(entries=>{const width=entries[0].contentRect.width;if(Math.ab
 const scriptWord=document.querySelector('#sangam-script');
 const scripts=[['සංගමය','si'],['ਸੰਗਮ','pa'],['संगम','hi'],['சங்கம்','ta'],['સંગમ','gu'],['సంఘం','te']];
 let scriptTimer=null;
+let scriptFlight=null;
 const ensemble=document.querySelector('#society-ensemble');
 let ensembleAnimations=[];
 function finishSequences(){
  clearTimeout(scriptTimer);scriptTimer=null;
+ scriptFlight?.cancel();scriptFlight=null;
  scriptWord.textContent='Sangam';scriptWord.removeAttribute('lang');
  ensembleAnimations.forEach(animation=>animation.cancel());ensembleAnimations=[];
  ensemble.dataset.phase='settled';
 }
 function playScripts(index=0){
- if(motionOff||index>=scripts.length){scriptWord.textContent='Sangam';scriptWord.removeAttribute('lang');return;}
- scriptWord.textContent=scripts[index][0];scriptWord.lang=scripts[index][1];
- scriptTimer=setTimeout(()=>playScripts(index+1),450);
+ scriptFlight?.cancel();
+ const finalWord=index>=scripts.length;
+ scriptWord.textContent=finalWord?'Sangam':scripts[index][0];
+ if(finalWord)scriptWord.removeAttribute('lang');else scriptWord.lang=scripts[index][1];
+ if(motionOff){scriptWord.textContent='Sangam';scriptWord.removeAttribute('lang');return;}
+ const frames=[
+  {offset:0,transform:'translate(-85px, 8px)',opacity:0,filter:'blur(3px)'},
+  {offset:.48,transform:'translate(0, 0)',opacity:1,filter:'blur(0)'},
+  {offset:.8,transform:'translate(0, 0)',opacity:1,filter:'blur(0)'},
+  {offset:1,transform:finalWord?'translate(0, 0)':'translate(22px, -3px)',opacity:finalWord?1:0,filter:'blur(0)'}
+ ];
+ scriptFlight=scriptWord.animate(frames,{duration:finalWord?420:550,easing:'cubic-bezier(.2,.7,.3,1)',fill:'none'});
+ if(!finalWord)scriptTimer=setTimeout(()=>playScripts(index+1),550);
 }
 function playEnsemble(){
  if(motionOff)return;
@@ -148,3 +161,33 @@ motionButton.addEventListener('click',()=>{if(motionOff)finishSequences();});
 reduced.addEventListener('change',()=>{if(motionOff)finishSequences();});
 let sequenceWidth=innerWidth;
 addEventListener('resize',()=>{if(innerWidth!==sequenceWidth){sequenceWidth=innerWidth;if(ensembleAnimations.some(a=>a.playState==='running'))finishSequences();}});
+
+// Native tab semantics with arrow-key navigation for both levels of navigation.
+function bindTabs(list,activate){
+ const tabs=[...list.querySelectorAll('[role="tab"]')];
+ function select(tab){tabs.forEach(item=>{const active=item===tab;item.setAttribute('aria-selected',String(active));item.tabIndex=active?0:-1;document.getElementById(item.getAttribute('aria-controls')).hidden=!active;});activate?.(tab);}
+ tabs.forEach((tab,index)=>{
+  tab.addEventListener('click',()=>select(tab));
+  tab.addEventListener('keydown',event=>{let next;if(event.key==='ArrowRight')next=(index+1)%tabs.length;if(event.key==='ArrowLeft')next=(index+tabs.length-1)%tabs.length;if(event.key==='Home')next=0;if(event.key==='End')next=tabs.length-1;if(next!==undefined){event.preventDefault();select(tabs[next]);tabs[next].focus({preventScroll:true});}});
+ });
+ return select;
+}
+const viewSwitch=document.querySelector('.view-switch');
+const selectView=bindTabs(viewSwitch,tab=>{
+ closeMenu();
+ viewSwitch.scrollIntoView({behavior:'instant',block:'start'});
+ if(tab.id==='view-vision')reserveGalleryCopy();
+});
+bindTabs(document.querySelector('.design-tabs'));
+// Header/footer chapter links always reveal the vision before following the anchor.
+document.addEventListener('click',event=>{
+ const anchor=event.target.closest('a[href^="#"]');
+ if(!anchor)return;
+ const destination=document.querySelector(anchor.getAttribute('href'));
+ if(destination?.closest('#vision-panel')&&document.querySelector('#vision-panel').hidden)selectView(document.querySelector('#view-vision'));
+});
+const executionLinks=[...document.querySelectorAll('.execution-nav a')];
+const executionObserver=new IntersectionObserver(entries=>{
+ for(const entry of entries)if(entry.isIntersecting)executionLinks.forEach(link=>link.setAttribute('aria-current',String(link.hash===`#${entry.target.id}`)));
+},{rootMargin:'-190px 0px -45% 0px',threshold:0});
+document.querySelectorAll('.execution-section').forEach(section=>executionObserver.observe(section));
