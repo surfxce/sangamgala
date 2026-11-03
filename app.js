@@ -173,10 +173,24 @@ function bindTabs(list,activate){
  return select;
 }
 const viewSwitch=document.querySelector('.view-switch');
+const executionChooser=document.querySelector('#execution-chooser');
+const teamWorkspaces=[...document.querySelectorAll('#execution-panel .execution-layout')];
+function chooseExecutionTeam(team){
+ executionChooser.hidden=Boolean(team);
+ teamWorkspaces.forEach(workspace=>workspace.hidden=workspace.id!==`${team}-workspace`);
+ viewSwitch.scrollIntoView({behavior:'instant',block:'start'});
+}
+document.querySelectorAll('[data-team]').forEach(button=>button.addEventListener('click',()=>chooseExecutionTeam(button.dataset.team)));
+document.querySelectorAll('.team-back').forEach(button=>button.addEventListener('click',()=>{
+ const team=button.closest('.execution-layout').id.replace('-workspace','');
+ chooseExecutionTeam(null);
+ document.querySelector(`[data-team="${team}"]`).focus({preventScroll:true});
+}));
 const selectView=bindTabs(viewSwitch,tab=>{
  closeMenu();
  viewSwitch.scrollIntoView({behavior:'instant',block:'start'});
  if(tab.id==='view-vision')reserveGalleryCopy();
+ else chooseExecutionTeam(null);
 });
 bindTabs(document.querySelector('.design-tabs'));
 // Header/footer chapter links always reveal the vision before following the anchor.

@@ -10,7 +10,10 @@ Open http://localhost:4173. No dependencies or build step. GitHub Pages serves t
 
 ## Features
 
-- Vision / execution navigation with a floating execution section menu.
+- Vision / execution navigation; execution opens with Marketing, Creative, Socials or Operations, Events.
+- Marketing campaign timeline with a whole-season weekly map, week details, post/ticket filters, animated artwork previews and historical society comparisons.
+- All 11 Sangam milestones target 21 November 2027. ISC/SLA dates are projected from 2026 onto the same month/day in 2027 and clearly labelled. Approximate SLA dates remain an approximate window.
+- Six original marketing graphics are preserved. The save-the-date and reveal previews flag their outdated 22 November date.
 - Fonts, colours and details design-system tabs with annotated wordmark and supplied references.
 - Static planning list; venue outreach marked in progress. Status updates are maintained in the source.
 - Multilingual Sangam lettering sweeps in from the left and resolves to the wordmark.
@@ -27,6 +30,6 @@ Open http://localhost:4173. No dependencies or build step. GitHub Pages serves t
 
 ## Edit
 
-Content: `index.html`. Design: `style.css`. Gallery and interactions: `app.js`. Artwork and original pitch: `assets/`.
+Content: `index.html`. Design: `style.css`. Gallery and navigation: `app.js`. Campaign data: `campaign-data.mjs`; timeline interactions: `campaign.js`; timeline styles: `campaign.css`. Artwork and original pitch: `assets/`.
 
-The site is a proposal. Venue, date, beneficiary, final auction lots and university review remain to be confirmed. There is no ticket checkout or live bidding.
+The site is a proposal. The planning date is 21 November 2027; venue, beneficiary, final auction lots and university review remain to be confirmed. There is no ticket checkout or live bidding.
