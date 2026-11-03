@@ -201,7 +201,55 @@ document.addEventListener('click',event=>{
  if(destination?.closest('#vision-panel')&&document.querySelector('#vision-panel').hidden)selectView(document.querySelector('#view-vision'));
 });
 const executionLinks=[...document.querySelectorAll('.execution-nav a')];
-const executionObserver=new IntersectionObserver(entries=>{
- for(const entry of entries)if(entry.isIntersecting)executionLinks.forEach(link=>link.setAttribute('aria-current',String(link.hash===`#${entry.target.id}`)));
-},{rootMargin:'-190px 0px -45% 0px',threshold:0});
-document.querySelectorAll('.execution-section').forEach(section=>executionObserver.observe(section));
+const creativeNav=document.querySelector('#creative-subnav');
+const creativeHeading=document.querySelector('#creative-nav-heading');
+const executionSections=[...document.querySelectorAll('.execution-section')];
+const creativeAssets=[...document.querySelectorAll('.creative-asset')];
+let executionScrollFrame=0;
+function syncExecutionNavigation(){
+ executionScrollFrame=0;
+ const sections=executionSections.filter(section=>section.getClientRects().length);
+ if(!sections.length)return;
+ const navHeight=document.querySelector('#marketing-workspace .execution-nav').getBoundingClientRect().height;
+ const mobile=matchMedia('(max-width:620px)').matches;
+ const line=mobile?150+navHeight:205;
+ let active=sections[0];
+ for(const section of sections)if(section.getBoundingClientRect().top<=line+30)active=section;
+ const creative=active.id==='creative-assets';
+ creativeNav.hidden=!creative;
+ creativeHeading.setAttribute('aria-expanded',String(creative));
+ document.querySelector('#marketing-workspace .execution-nav').classList.toggle('show-creative',creative);
+ let asset=creativeAssets[0];
+ if(creative)for(const item of creativeAssets)if(item.getBoundingClientRect().top<=line+60)asset=item;
+ executionLinks.forEach(link=>{
+  const selected=link.closest('.creative-subnav')?creative&&link.hash===`#${asset.id}`:link.hash===`#${active.id}`;
+  if(selected)link.setAttribute('aria-current','location');else link.removeAttribute('aria-current');
+ });
+ if(creative){
+  const link=creativeNav.querySelector(`[href="#${asset.id}"]`);
+  const box=link.getBoundingClientRect(),bounds=creativeNav.getBoundingClientRect();
+  if(mobile){
+   if(box.left<bounds.left||box.right>bounds.right)creativeNav.scrollTo({left:creativeNav.scrollLeft+box.left-bounds.left-12,behavior:'instant'});
+  }else{
+   if(box.top<bounds.top)creativeNav.scrollTop+=box.top-bounds.top-8;
+   else if(box.bottom>bounds.bottom)creativeNav.scrollTop+=box.bottom-bounds.bottom+8;
+  }
+ }
+}
+function queueExecutionNavigation(){if(!executionScrollFrame)executionScrollFrame=requestAnimationFrame(syncExecutionNavigation);}
+addEventListener('scroll',queueExecutionNavigation,{passive:true});
+addEventListener('resize',queueExecutionNavigation);
+document.querySelectorAll('#execution-panel button').forEach(button=>button.addEventListener('click',queueExecutionNavigation));
+document.querySelectorAll('#marketing-workspace .execution-nav a,.creative-index a').forEach(link=>link.addEventListener('click',event=>{
+ event.preventDefault();
+ const destination=document.querySelector(link.hash);
+ // Expand before measuring the mobile jump, so neither nav row covers the title.
+ const creative=Boolean(destination.closest('#creative-assets'));
+ creativeNav.hidden=!creative;
+ creativeHeading.setAttribute('aria-expanded',String(creative));
+ document.querySelector('#marketing-workspace .execution-nav').classList.toggle('show-creative',creative);
+ destination.scrollIntoView({behavior:'instant',block:'start'});
+ history.replaceState(null,'',link.hash);
+ syncExecutionNavigation();
+}));
+syncExecutionNavigation();
